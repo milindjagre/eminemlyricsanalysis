@@ -20,6 +20,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{ SaveMode, SparkSession, Column, Row, Dataset, DataFrame }
 import org.apache.spark.sql.functions.{ concat, lit, sha2, when, col }
 import org.apache.spark.sql.types.{ StructType, StructField, StringType, IntegerType, DataType, FloatType, DoubleType, TimestampType }
+import scala.collection.mutable.HashMap
 import scala.io.Source
 import scala.sys.process._
 import scala.util.matching.Regex
@@ -48,11 +49,17 @@ object EminemLyricsAnalysis {
       .option("delimiter", "\n")
       .load("/project/dz/collab/mjagre/spark/inputfile.txt")
 
+    val keyValueHashMap: HashMap[String, Int] = HashMap.empty[String, Int]
+
     inputDF.show
 
     inputDF.foreach(
-            row => row.toString().split(" ").foreach(
-                    col => print("column:" + col + "\n")))
+      row => row.toString().split(" ").foreach(
+        entry => if (keyValueHashMap.contains(entry))
+          keyValueHashMap.put(entry, keyValueHashMap.getOrElse(entry, 1) + 1)
+        else
+          keyValueHashMap.put(entry, 1)))
+    keyValueHashMap.foreach(f => println("MAP:" + f))
 
   }
 }
