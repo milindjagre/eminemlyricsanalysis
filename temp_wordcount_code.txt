@@ -18,6 +18,19 @@ public class TempWordCountCode {
 	 * @param args
 	 */
 
+	public static List<String> getStopWords() throws IOException {
+		List<String> outputList = new ArrayList<String>();
+		BufferedReader br = new BufferedReader(new FileReader(
+				"S:\\nlp_en_stop_words.txt"));
+		String line = null;
+		while ((line = br.readLine()) != null) {
+			outputList.add(line);
+		}
+		br.close();
+		return outputList;
+
+	}
+
 	public static LinkedHashMap<String, Integer> sortHashMapByValues(
 			Map<String, Integer> wordCountMap) {
 		List<String> mapKeys = new ArrayList<String>(wordCountMap.keySet());
@@ -52,17 +65,20 @@ public class TempWordCountCode {
 		BufferedReader br = new BufferedReader(new FileReader(
 				"S:\\inputfile.txt"));
 		Map<String, Integer> wordCountMap = new HashMap<String, Integer>();
+		List<String> stopWordsList = getStopWords();
 		String line = null;
 		String[] lineSplitter = null;
 		int i = 0;
 		while ((line = br.readLine()) != null) {
 			lineSplitter = line.split(" ");
 			for (i = 0; i < lineSplitter.length; i++) {
-				if (wordCountMap.containsKey(lineSplitter[i]))
-					wordCountMap.put(lineSplitter[i],
-							wordCountMap.get(lineSplitter[i]) + 1);
-				else
-					wordCountMap.put(lineSplitter[i], 1);
+				if (!(stopWordsList.contains(lineSplitter[i]))) {
+					if (wordCountMap.containsKey(lineSplitter[i]))
+						wordCountMap.put(lineSplitter[i],
+								wordCountMap.get(lineSplitter[i]) + 1);
+					else
+						wordCountMap.put(lineSplitter[i], 1);
+				}
 			}
 		}
 		LinkedHashMap<String, Integer> sortedWordCountMap = sortHashMapByValues(wordCountMap);
@@ -70,7 +86,7 @@ public class TempWordCountCode {
 		int count = 0;
 
 		for (Entry<String, Integer> entry : sortedWordCountMap.entrySet()) {
-			if (count < 10)
+			if (count < 10) // printing top 10 words with most frequency
 				System.out.println("Key: " + entry.getKey() + " Value: "
 						+ entry.getValue());
 			count++;
