@@ -1,0 +1,41 @@
+package co.milindjagre;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+public class TempCode {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) throws IOException {
+		// TODO Auto-generated method stub
+		BufferedReader br = new BufferedReader(new FileReader(
+				"S:\\inputfile.txt"));
+		Map<String, Integer> wordCountMap = new HashMap<String, Integer>();
+		String line = null;
+		String[] lineSplitter = null;
+		int i = 0;
+		while ((line = br.readLine()) != null) {
+			System.out.println(line);
+			lineSplitter = line.split(" ");
+			for (i = 0; i < lineSplitter.length; i++) {
+				if (wordCountMap.containsKey(lineSplitter[i]))
+					wordCountMap.put(lineSplitter[i],
+							wordCountMap.get(lineSplitter[i] + 1));
+				else
+					wordCountMap.put(lineSplitter[i], 1);
+			}
+		}
+		for (Entry<String, Integer> entry : wordCountMap.entrySet()) {
+			System.out.println("Key: " + entry.getKey() + " Value: "
+					+ entry.getValue());
+		}
+		br.close();
+	}
+
+}
