@@ -3,15 +3,50 @@ package co.milindjagre;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class TempCode {
+public class TempWordCountCode {
 
 	/**
 	 * @param args
 	 */
+
+	public static LinkedHashMap<String, Integer> sortHashMapByValues(
+			Map<String, Integer> wordCountMap) {
+		List<String> mapKeys = new ArrayList<String>(wordCountMap.keySet());
+		List<Integer> mapValues = new ArrayList<Integer>(wordCountMap.values());
+		Collections.sort(mapValues, Collections.reverseOrder());
+		Collections.sort(mapKeys);
+
+		LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+
+		Iterator<Integer> valueIt = mapValues.iterator();
+		while (valueIt.hasNext()) {
+			Integer val = valueIt.next();
+			Iterator<String> keyIt = mapKeys.iterator();
+
+			while (keyIt.hasNext()) {
+				String key = keyIt.next();
+				Integer comp1 = wordCountMap.get(key);
+				Integer comp2 = val;
+
+				if (comp1.equals(comp2)) {
+					keyIt.remove();
+					sortedMap.put(key, val);
+					break;
+				}
+			}
+		}
+		return sortedMap;
+	}
+
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		BufferedReader br = new BufferedReader(new FileReader(
@@ -21,21 +56,25 @@ public class TempCode {
 		String[] lineSplitter = null;
 		int i = 0;
 		while ((line = br.readLine()) != null) {
-			System.out.println(line);
 			lineSplitter = line.split(" ");
 			for (i = 0; i < lineSplitter.length; i++) {
 				if (wordCountMap.containsKey(lineSplitter[i]))
 					wordCountMap.put(lineSplitter[i],
-							wordCountMap.get(lineSplitter[i] + 1));
+							wordCountMap.get(lineSplitter[i]) + 1);
 				else
 					wordCountMap.put(lineSplitter[i], 1);
 			}
 		}
-		for (Entry<String, Integer> entry : wordCountMap.entrySet()) {
-			System.out.println("Key: " + entry.getKey() + " Value: "
-					+ entry.getValue());
+		LinkedHashMap<String, Integer> sortedWordCountMap = sortHashMapByValues(wordCountMap);
+
+		int count = 0;
+
+		for (Entry<String, Integer> entry : sortedWordCountMap.entrySet()) {
+			if (count < 10)
+				System.out.println("Key: " + entry.getKey() + " Value: "
+						+ entry.getValue());
+			count++;
 		}
 		br.close();
 	}
-
 }
