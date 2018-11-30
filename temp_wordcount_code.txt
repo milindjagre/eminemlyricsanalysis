@@ -22,6 +22,8 @@ import opennlp.tools.doccat.DocumentSampleStream;
 //import co.milindjagre.PersonName;
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
+import opennlp.tools.sentdetect.SentenceDetectorME;
+import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.SimpleTokenizer;
 import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.util.InvalidFormatException;
@@ -35,10 +37,18 @@ public class TempWordCountCode {
 	 * @param args
 	 */
 
-	public static int classifyNewTweet(DoccatModel model, String tweet)
+	public static int getNumberOfSentences(SentenceModel sentenceModel,
+			String input) throws IOException {
+		SentenceDetectorME detector = new SentenceDetectorME(sentenceModel);
+		String sentences[] = detector.sentDetect(input);
+		return sentences.length;
+	}
+
+	public static int classifyNewTweet(DoccatModel sentimentModel, String input)
 			throws IOException {
-		DocumentCategorizerME myCategorizer = new DocumentCategorizerME(model);
-		double[] outcomes = myCategorizer.categorize(tweet);
+		DocumentCategorizerME myCategorizer = new DocumentCategorizerME(
+				sentimentModel);
+		double[] outcomes = myCategorizer.categorize(input);
 		return Integer.parseInt(myCategorizer.getBestCategory(outcomes));
 	}
 
@@ -144,15 +154,20 @@ public class TempWordCountCode {
 				"UTF-8");
 		ObjectStream<DocumentSample> sampleStream = new DocumentSampleStream(
 				lineStream);
-		DoccatModel model = DocumentCategorizerME.train("en", sampleStream);
+		DoccatModel sentimentModel = DocumentCategorizerME.train("en",
+				sampleStream);
+
+		InputStream inputStream = new FileInputStream("S:\\en-sent.bin");
+		SentenceModel sentenceModel = new SentenceModel(inputStream);
+
 		String line = null, mapKey = null;
 		String[] lineSplitter = null;
-		int i = 0, positiveCounts = 0, negativeCounts = 0;
+		int i = 0, positiveCounts = 0, negativeCounts = 0, sentenceCounts = 0;
 		while ((line = br.readLine()) != null) {
 			peopleNamesList.addAll(getPeople(line));
-			if (classifyNewTweet(model, line) == 1)
+			if (classifyNewTweet(sentimentModel, line) == 1)
 				positiveCounts++;
-			if (classifyNewTweet(model, line) == 0)
+			if (classifyNewTweet(sentimentModel, line) == 0)
 				negativeCounts++;
 			lineSplitter = line.split(" ");
 			for (i = 0; i < lineSplitter.length; i++) {
@@ -170,6 +185,7 @@ public class TempWordCountCode {
 						&& !(negativeWordsList.contains(mapKey)))
 					negativeWordsList.add(mapKey);
 			}
+			sentenceCounts += getNumberOfSentences(sentenceModel, line);
 		}
 		LinkedHashMap<String, Integer> sortedWordCountMap = sortHashMapByValues(wordCountMap);
 		int count = 0;
@@ -204,6 +220,10 @@ public class TempWordCountCode {
 				.println("\n----------------------------------------------------------------");
 		System.out.println("***NEGATIVE SENTIMENT COUNT***");
 		System.out.print(negativeCounts);
+		System.out
+				.println("\n----------------------------------------------------------------");
+		System.out.println("***NUMBER OF SENTENCES USED***");
+		System.out.print(sentenceCounts);
 		br.close();
 	}
 }
