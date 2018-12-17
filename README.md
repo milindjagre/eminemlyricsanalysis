@@ -1,4 +1,4 @@
-# EMINEM Lyrics Analysis
+# EMIN3M Lyrics Analysis
 This repository represents the project titled `Eminem Lyrics Analysis`
 
 I am a HUUUUUUGEEEEEE EMIN3M Fan.
